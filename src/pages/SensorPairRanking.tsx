@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Network, Info, Database, Award, Layers } from 'lucide-react';
+import { Network, Info, Database, Award } from 'lucide-react';
 
 interface PairResult {
     sensorA: string;
@@ -129,15 +129,6 @@ export const SensorPairRanking: React.FC = () => {
     });
 
     const bestRow = rows[0] && rows[0].score !== undefined ? rows[0] : null;
-
-    const referenceScore = (a: string, b: string) => scoreOf(getResult(a, b));
-    const thighShankScore = (() => {
-        const scores = [
-            referenceScore('Left Thigh', 'Left Shank'),
-            referenceScore('Right Thigh', 'Right Shank'),
-        ].filter((value): value is number => value !== undefined);
-        return scores.length ? Math.min(...scores) : undefined;
-    })();
 
     return (
         <div className="space-y-6">
@@ -292,35 +283,6 @@ export const SensorPairRanking: React.FC = () => {
                         </p>
                     </div>
                 )}
-            </section>
-
-            {/* Reference Configuration */}
-            <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-4">
-                    <Layers className="w-5 h-5 text-[#E87532]" />
-                    <h2 className="text-lg font-semibold text-[#172B4D]">
-                        Reference Configuration
-                    </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="p-4 rounded-lg border border-[#E5E7EB] bg-[#F7F8FA]">
-                        <p className="font-semibold text-[#172B4D]">
-                            Thigh + Shank
-                        </p>
-                        <p className="text-xs text-[#E87532] font-medium mt-1">
-                            Original plan · Reference only
-                        </p>
-                        <p className="text-sm text-[#718096] mt-2">
-                            The initially proposed two-sensor arrangement. Exact body
-                            placement remains undecided.
-                        </p>
-                        <p className="text-sm font-semibold text-[#172B4D] mt-2">
-                            Combined RMSE: {formatMetric(thighShankScore)}
-                        </p>
-                    </div>
-
-                </div>
             </section>
 
             {/* Data Source */}
