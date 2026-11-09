@@ -21,8 +21,13 @@ interface EvaluationFile {
 
 const SENSOR_CONFIGURATIONS = [
   '8 IMUs (baseline)',
-  '3 IMUs (coming next)',
-  '2 IMUs: best pair (after the placement study)',
+  '2 IMUs: best pair',
+];
+
+const MODEL_NAMES = [
+  'Baseline LSTM',
+  'Base paper model (BiLSTM autoencoder + VGP)',
+  'Our model',
 ];
 
 const EMPTY_METRICS: MomentMetrics = {
@@ -88,12 +93,14 @@ export const ResultsReports: React.FC = () => {
   const displayRows: ModelEvaluation[] =
     results.length > 0
       ? results
-      : SENSOR_CONFIGURATIONS.map((sensorSet) => ({
-        model: '–',
-        sensorSet,
-        kam: EMPTY_METRICS,
-        kfm: EMPTY_METRICS,
-      }));
+      : MODEL_NAMES.flatMap((model) =>
+        SENSOR_CONFIGURATIONS.map((sensorSet) => ({
+          model,
+          sensorSet,
+          kam: EMPTY_METRICS,
+          kfm: EMPTY_METRICS,
+        }))
+      );
 
   // Export only the model-evaluation table.
   const handleExportCSV = () => {

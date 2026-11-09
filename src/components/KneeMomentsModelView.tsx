@@ -19,39 +19,93 @@ import {
   getKneeMomentCurves
 } from '../data';
 import {
-  loadReplayData,
-  ReplayDataResult
+  checkAvailableConfigs,
+  loadReplayIndex,
+  loadReplayStep,
+  ReplayDataResult,
+  ReplayIndex
 } from '../services/replayDataService';
 
 export const KneeMomentsModelView: React.FC = () => {
-  const [person, setPerson] = useState<PersonOption>('Sample person A');
+  const [person, setPerson] = useState<PersonOption>(PERSON_OPTIONS[0]);
   const [sensors, setSensors] = useState<SensorConfigOption>('8 IMUs (baseline)');
   const [step, setStep] = useState<number>(1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [activeCursor, setActiveCursor] = useState<number | null>(null);
 
   const playTimerRef = useRef<number | null>(null);
+  const [replayIndex, setReplayIndex] = useState<ReplayIndex | null>(null);
   const [replayData, setReplayData] = useState<ReplayDataResult | null>(null);
+  const [replayProblem, setReplayProblem] = useState<string>('');
+  const [availableConfigs, setAvailableConfigs] = useState<Partial<Record<SensorConfigOption, boolean>>>({});
+
+  // People and step counts come from replay_data.json when it exists.
+  const personOptions: string[] = replayIndex
+    ? replayIndex.subjects.map((subject) => subject.id)
+    : PERSON_OPTIONS;
+  const maxStep = replayIndex
+    ? Math.max(
+        1,
+        replayIndex.subjects.find((subject) => subject.id === person)?.stepCount ?? 1
+      )
+    : 10;
 
   // Generate sample curves as the fallback
   const sampleData = getKneeMomentCurves(person, sensors, step);
 
-  // Load real experimental data when available
+  // Find out which sensor options have a results file
+  useEffect(() => {
+    checkAvailableConfigs().then(setAvailableConfigs);
+  }, []);
+
+  // Read the list of people whenever the sensor option changes
   useEffect(() => {
     let cancelled = false;
 
+    setReplayIndex(null);
     setReplayData(null);
 
-    loadReplayData(person, step).then((result) => {
-      if (!cancelled) {
-        setReplayData(result);
+    loadReplayIndex(sensors).then((result) => {
+      if (cancelled) return;
+
+      if (result.ok) {
+        setReplayIndex(result.index);
+        setReplayProblem('');
+        setPerson(result.index.subjects[0].id);
+        setStep(1);
+      } else {
+        setReplayProblem(result.reason);
+        setPerson(PERSON_OPTIONS[0]);
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [person, step]);
+  }, [sensors]);
+
+  // Load the selected person and step
+  useEffect(() => {
+    if (!replayIndex) return;
+
+    let cancelled = false;
+
+    loadReplayStep(sensors, person, step).then((result) => {
+      if (cancelled) return;
+
+      if (result.ok) {
+        setReplayData(result.result);
+        setReplayProblem('');
+      } else {
+        setReplayData(null);
+        setReplayProblem(result.reason);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [replayIndex, sensors, person, step]);
 
   // Prefer real experimental data; otherwise use sample curves
   const data = replayData?.data ?? sampleData;
@@ -64,7 +118,7 @@ export const KneeMomentsModelView: React.FC = () => {
         currentPercent += 2.5;
         if (currentPercent > 100) {
           currentPercent = 0;
-          setStep((prev) => (prev % 10) + 1);
+          setStep((prev) => (prev % maxStep) + 1);
         }
         setActiveCursor(currentPercent);
       }, 50);
@@ -78,7 +132,12 @@ export const KneeMomentsModelView: React.FC = () => {
     return () => {
       if (playTimerRef.current) clearInterval(playTimerRef.current);
     };
-  }, [isPlaying]);
+  }, [isPlaying, maxStep]);
+
+  const handlePersonChange = (value: string) => {
+    setPerson(value);
+    setStep(1);
+  };
 
   const togglePlay = () => {
     setIsPlaying((prev) => !prev);
@@ -102,7 +161,7 @@ export const KneeMomentsModelView: React.FC = () => {
           </>
         ) : (
           <>
-            Sample curves only. No valid experimental results were found.
+            Sample curves only. {replayProblem || 'No valid experimental results were found.'}{' '}
             These curves are illustrative and are not real data or model output.
           </>
         )}
@@ -122,10 +181,10 @@ export const KneeMomentsModelView: React.FC = () => {
               <select
                 id="person-select"
                 value={person}
-                onChange={(e) => setPerson(e.target.value as PersonOption)}
+                onChange={(e) => handlePersonChange(e.target.value)}
                 className="w-48 appearance-none bg-white border border-[#E5E7EB] hover:border-[#F59E5B] text-[#172B4D] text-xs sm:text-sm font-medium rounded-md px-3 py-1.5 pr-8 focus:outline-none focus:ring-1 focus:ring-[#E87532] focus:border-[#E87532] cursor-pointer shadow-2xs transition-colors"
               >
-                {PERSON_OPTIONS.map((opt) => (
+                {personOptions.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -154,7 +213,7 @@ export const KneeMomentsModelView: React.FC = () => {
                 id="step-slider"
                 type="range"
                 min={1}
-                max={10}
+                max={maxStep}
                 value={step}
                 onChange={(e) => setStep(Number(e.target.value))}
                 className="w-32 sm:w-40 h-1.5 bg-[#E5E7EB] rounded-lg appearance-none cursor-pointer accent-[#E87532]"
@@ -178,7 +237,7 @@ export const KneeMomentsModelView: React.FC = () => {
                   <option
                     key={opt}
                     value={opt}
-                    disabled={opt !== '8 IMUs (baseline)'}
+                    disabled={opt !== '8 IMUs (baseline)' && !availableConfigs[opt]}
                   >
                     {opt}
                   </option>

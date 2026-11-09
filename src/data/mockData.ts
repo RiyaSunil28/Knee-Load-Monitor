@@ -54,7 +54,7 @@ export const mockSensors: SensorConnectivityItem[] = [
     name: 'ESP32 Controller',
     role: 'ESP32 Controller',
     status: 'connected',
-    simulatedState: 'BLE Gateway Online (Simulated Feed)',
+    simulatedState: 'Wi-Fi Gateway Online (Simulated Feed)',
     lastUpdate: 'Just now',
     battery: 98,
     signalStrength: '-42 dBm (Simulated)',
@@ -159,41 +159,6 @@ export const mockDataTransmission = {
   bufferUsagePercent: 14,
 };
 
-/** System software component statuses */
-export const mockSoftwareComponents = [
-  {
-    name: 'Frontend Application',
-    version: 'v0.1.0 (React 18 + Vite)',
-    category: 'Client',
-    status: 'Online',
-    type: 'actual',
-    description: 'Active client runtime rendered in browser.',
-  },
-  {
-    name: 'API Service Layer',
-    version: 'v1.4-virtual',
-    category: 'Middleware',
-    status: 'Simulated Mode',
-    type: 'simulated',
-    description: 'Mock client-side adapter serving simulated telemetry.',
-  },
-  {
-    name: 'Biomechanics Processing Model',
-    version: 'KneeLoad-Est-v2.1 (Simulated)',
-    category: 'Model Inference',
-    status: 'Simulated Engine',
-    type: 'simulated',
-    description: 'Simulated polynomial transfer function estimating joint loading.',
-  },
-  {
-    name: 'Data Storage Cache',
-    version: 'Local State Memory',
-    category: 'Persistence',
-    status: 'Active (In-Memory)',
-    type: 'actual',
-    description: 'Browser in-memory cache holding session telemetry.',
-  },
-];
 
 /** System activity log entries */
 export const mockActivityLogs: SystemActivityLog[] = [
@@ -201,7 +166,7 @@ export const mockActivityLogs: SystemActivityLog[] = [
     id: 'log-001',
     timestamp: '10:14:28',
     component: 'ESP32 Controller',
-    event: 'BLE peripheral handshake acknowledged (Simulated)',
+    event: 'Wi-Fi link to laptop established (Simulated)',
     status: 'Success',
   },
   {
@@ -249,7 +214,7 @@ export const mockActivityLogs: SystemActivityLog[] = [
 ];
 
 /** Base simulated initial IMU reading buffer */
-export const initialThighIMU = {
+export const initialSensor1IMU = {
   ax: 0.42,
   ay: 9.78,
   az: 1.15,
@@ -258,7 +223,7 @@ export const initialThighIMU = {
   gz: 5.6,
 };
 
-export const initialShankIMU = {
+export const initialSensor2IMU = {
   ax: -0.28,
   ay: 9.84,
   az: 2.34,
@@ -279,8 +244,7 @@ export const PERSON_OPTIONS: PersonOption[] = [
 
 export const SENSOR_OPTIONS: SensorConfigOption[] = [
   '8 IMUs (baseline)',
-  '3 IMUs (coming next)',
-  '2 IMUs: best pair (after the placement study)',
+  '2 IMUs: best pair',
 ];
 
 /**

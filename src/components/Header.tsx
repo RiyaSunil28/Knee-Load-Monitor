@@ -20,6 +20,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle = () => {} }) => {
         return { title: 'Results & Reports', breadcrumb: 'Results & Reports' };
       case ROUTES.SYSTEM_STATUS:
         return { title: 'System Status', breadcrumb: 'System Status' };
+      case ROUTES.SENSOR_PAIR_RANKING:
+        return { title: 'Sensor Pair Ranking', breadcrumb: 'Sensor Pair Ranking' };
       case ROUTES.HOME:
       case ROUTES.DASHBOARD:
       default:
@@ -73,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle = () => {} }) => {
           </div>
           <div className="hidden md:block text-left">
             <div className="text-xs font-semibold text-[#172B4D] leading-tight">
-              Clinical Reviewer
+              Researcher
             </div>
             <div className="text-[11px] text-[#718096] leading-tight">
               Station ID: #01

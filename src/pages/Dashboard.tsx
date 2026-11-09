@@ -5,8 +5,7 @@ import {
   Clock,
   Footprints,
   Radio,
-  AlertCircle,
-  FileSpreadsheet
+  AlertCircle
 } from 'lucide-react';
 import { MetricCard } from '../components/MetricCard';
 import { SensorStatusCard } from '../components/SensorStatus';
@@ -14,8 +13,7 @@ import { LoadTrendChart } from '../components/LoadTrendChart';
 import {
   mockDashboardMetrics,
   mockSensors,
-  mockLoadTrend,
-  mockRecentSessions
+  mockLoadTrend
 } from '../data';
 
 export const Dashboard: React.FC = () => {
@@ -145,113 +143,6 @@ export const Dashboard: React.FC = () => {
         <p className="text-xs text-[#718096] px-1">
           Confidence band: coming next. Uncertainty estimates have not yet been validated.
         </p>
-      </section>
-
-      {/* ============================================================
-          E. Recent Monitoring Sessions
-          ============================================================ */}
-      <section className="bg-white border border-[#E5E7EB] rounded-lg shadow-sm overflow-hidden" aria-labelledby="recent-sessions-heading">
-        {/* Table Card Header */}
-        <div className="px-6 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
-          <div>
-            <h3 id="recent-sessions-heading" className="text-base font-bold text-[#172B4D] tracking-tight">
-              Recent Sessions
-            </h3>
-            <p className="text-xs text-[#718096] mt-0.5">
-              Historical records of wearable telemetry recording runs.
-            </p>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#718096]">
-            <FileSpreadsheet className="w-4 h-4 text-[#E87532]" />
-            <span>Total: {mockRecentSessions.length} recorded</span>
-          </div>
-        </div>
-
-        {/* Table Content */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#F7F8FA] border-b border-[#E5E7EB]">
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider">
-                  Session ID
-                </th>
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider">
-                  Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider">
-                  Duration
-                </th>
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider">
-                  Gait Cycles
-                </th>
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider">
-                  Avg Moment (KAM)
-                </th>
-                <th scope="col" className="px-6 py-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider text-right">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E7EB] text-sm">
-              {mockRecentSessions.map((session) => {
-                const getStatusBadge = (status: typeof session.status) => {
-                  switch (status) {
-                    case 'Active':
-                      return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#ECFDF5] text-[#16A36A] border border-[#A7F3D0]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A] animate-pulse"></span>
-                          Active
-                        </span>
-                      );
-                    case 'Completed':
-                      return (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F0F4F8] text-[#172B4D] border border-[#D9E2EC]">
-                          Completed
-                        </span>
-                      );
-                    case 'Archived':
-                    default:
-                      return (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F7F8FA] text-[#718096] border border-[#E5E7EB]">
-                          Archived
-                        </span>
-                      );
-                  }
-                };
-
-                return (
-                  <tr key={session.sessionId} className="hover:bg-[#F7F8FA]/80 transition-colors">
-                    <td className="px-6 py-4 font-mono font-medium text-[#172B4D] text-xs">
-                      {session.sessionId}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-[#202B3C]">
-                      {session.date}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-[#718096]">
-                      {session.duration}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-[#202B3C] font-medium tabular-nums">
-                      {session.gaitCycles}
-                    </td>
-                    <td className="px-6 py-4 text-xs font-bold text-[#172B4D] tabular-nums">
-                      {session.averageKAM || session.averageEstimatedLoad || '–'}
-                    </td>
-                    <td className="px-6 py-4 text-xs text-right">
-                      {getStatusBadge(session.status)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Table Footer */}
-        <div className="px-6 py-3 bg-[#F7F8FA] border-t border-[#E5E7EB] text-xs text-[#718096] flex items-center justify-between">
-          <span>All recorded session estimates derived from simulated biomechanical trials.</span>
-          <span className="font-medium text-[#172B4D]">Page 1 of 1</span>
-        </div>
       </section>
     </div>
   );

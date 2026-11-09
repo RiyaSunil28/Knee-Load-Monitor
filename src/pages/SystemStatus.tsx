@@ -6,17 +6,22 @@ import {
   Wifi,
   BatteryMedium,
   CheckCircle2,
-  Code2,
-  Activity,
-  Layers
+  Activity
 } from 'lucide-react';
 import { MetricCard } from '../components/MetricCard';
 import {
   mockSensors,
   mockDataTransmission,
-  mockSoftwareComponents,
   mockActivityLogs
 } from '../data';
+
+const DATA_FLOW_STEPS = [
+  { name: '2 IMU sensors', detail: 'Acceleration and angular velocity at 100 Hz.', state: 'Simulated' },
+  { name: 'ESP32', detail: 'Collects both sensors and sends the readings.', state: 'Simulated' },
+  { name: 'Wi-Fi link', detail: 'Sends the readings to the laptop.', state: 'Not built yet' },
+  { name: 'Model on laptop', detail: 'Estimates KAM and KFM for each step.', state: 'Not built yet' },
+  { name: 'Dashboard', detail: 'Shows the curves and result tables.', state: 'Working' },
+];
 
 export const SystemStatus: React.FC = () => {
   return (
@@ -189,68 +194,43 @@ export const SystemStatus: React.FC = () => {
       </section>
 
       {/* ============================================================
-          SECTION D: Software Components
+          SECTION D: Data Flow
           ============================================================ */}
-      <section className="bg-white border border-[#E5E7EB] rounded-lg p-5 sm:p-6 shadow-sm" aria-labelledby="software-components-heading">
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-[#E5E7EB]">
-          <div>
-            <h3 id="software-components-heading" className="text-base font-bold text-[#172B4D] tracking-tight">
-              Software Component Architecture
-            </h3>
-            <p className="text-xs text-[#718096] mt-0.5">
-              Clear distinction between active client interfaces and simulated subsystem services.
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-[#172B4D] bg-[#F7F8FA] border border-[#E5E7EB] px-3 py-1 rounded-md">
-            Stack: React 18 &bull; Vite &bull; TypeScript
-          </span>
+      <section className="bg-white border border-[#E5E7EB] rounded-lg p-5 sm:p-6 shadow-sm" aria-labelledby="data-flow-heading">
+        <div className="mb-5 pb-3 border-b border-[#E5E7EB]">
+          <h3 id="data-flow-heading" className="text-base font-bold text-[#172B4D] tracking-tight">
+            Data Flow
+          </h3>
+          <p className="text-xs text-[#718096] mt-0.5">
+            How the measurement travels from the body to this dashboard, and which steps are built.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {mockSoftwareComponents.map((component) => {
-            const isActual = component.type === 'actual';
-
-            return (
-              <div
-                key={component.name}
-                className={`p-4 rounded-lg border ${isActual ? 'bg-[#F7F8FA] border-[#E5E7EB]' : 'bg-white border-[#E5E7EB]'
-                  } space-y-2`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isActual ? (
-                      <Code2 className="w-4 h-4 text-[#E87532]" />
-                    ) : (
-                      <Layers className="w-4 h-4 text-[#718096]" />
-                    )}
-                    <h4 className="text-sm font-bold text-[#172B4D]">{component.name}</h4>
-                  </div>
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${isActual
-                      ? 'bg-[#ECFDF5] text-[#16A36A] border border-[#A7F3D0]'
-                      : 'bg-[#FFF1E8] text-[#E87532] border border-[#FFE4D4]'
-                      }`}
-                  >
-                    {component.status}
-                  </span>
-                </div>
-
-                <div className="text-xs text-[#718096] flex items-center justify-between">
-                  <span>Category: {component.category}</span>
-                  <span className="font-mono text-[10px] text-[#172B4D]">{component.version}</span>
-                </div>
-
-                <p className="text-xs text-[#202B3C] leading-relaxed pt-1 border-t border-[#E5E7EB]/60">
-                  {component.description}
-                </p>
-
-                <div className="text-[10px] font-semibold tracking-wider uppercase text-[#718096]">
-                  Classification: <span className={isActual ? 'text-[#16A36A]' : 'text-[#E87532]'}>{isActual ? 'Actual Client Runtime' : 'Simulated / Virtual Adapter'}</span>
-                </div>
+        <ol className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {DATA_FLOW_STEPS.map((step, index) => (
+            <li
+              key={step.name}
+              className="rounded-md border border-[#E5E7EB] bg-[#F7F8FA] p-3"
+            >
+              <div className="text-[10px] font-semibold text-[#718096] uppercase tracking-wider">
+                Step {index + 1}
               </div>
-            );
-          })}
-        </div>
+              <div className="text-sm font-bold text-[#172B4D] mt-1">{step.name}</div>
+              <p className="text-xs text-[#718096] mt-1">{step.detail}</p>
+              <span
+                className={`inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                  step.state === 'Working'
+                    ? 'bg-[#ECFDF5] text-[#16A36A] border-[#A7F3D0]'
+                    : step.state === 'Simulated'
+                    ? 'bg-[#FFF1E8] text-[#E87532] border-[#FFE4D4]'
+                    : 'bg-white text-[#718096] border-[#E5E7EB]'
+                }`}
+              >
+                {step.state}
+              </span>
+            </li>
+          ))}
+        </ol>
       </section>
 
       {/* ============================================================

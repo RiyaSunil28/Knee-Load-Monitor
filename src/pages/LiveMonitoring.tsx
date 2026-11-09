@@ -22,18 +22,18 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
-import { initialThighIMU, initialShankIMU } from '../data';
+import { initialSensor1IMU, initialSensor2IMU } from '../data';
 
 type MonitoringStatus = 'Idle' | 'Running' | 'Paused' | 'Stopped';
 
 interface SignalPoint {
   time: string;
-  thighAx: number;
-  thighAy: number;
-  thighAz: number;
-  thighGx: number;
-  thighGy: number;
-  thighGz: number;
+  s1Ax: number;
+  s1Ay: number;
+  s1Az: number;
+  s1Gx: number;
+  s1Gy: number;
+  s1Gz: number;
   estimatedKAM: number;
   estimatedKFM: number;
 }
@@ -41,17 +41,17 @@ interface SignalPoint {
 export const LiveMonitoring: React.FC = () => {
   const [status, setStatus] = useState<MonitoringStatus>('Idle');
   const [elapsedSeconds, setElapsedSeconds] = useState(755); // 12m 35s default
-  const [thighReadings, setThighReadings] = useState(initialThighIMU);
-  const [shankReadings, setShankReadings] = useState(initialShankIMU);
+  const [sensor1Readings, setSensor1Readings] = useState(initialSensor1IMU);
+  const [sensor2Readings, setSensor2Readings] = useState(initialSensor2IMU);
   const [currentKAM, setCurrentKAM] = useState(0.42);
   const [currentKFM, setCurrentKFM] = useState(0.68);
   const [signals, setSignals] = useState<SignalPoint[]>([
-    { time: '12:25', thighAx: 0.4, thighAy: 9.8, thighAz: 1.1, thighGx: 12.0, thighGy: -3.5, thighGz: 5.2, estimatedKAM: 0.32, estimatedKFM: 0.45 },
-    { time: '12:27', thighAx: 1.2, thighAy: 11.2, thighAz: 1.6, thighGx: 28.5, thighGy: -1.2, thighGz: 7.8, estimatedKAM: 0.38, estimatedKFM: 0.58 },
-    { time: '12:29', thighAx: 2.1, thighAy: 13.4, thighAz: 2.3, thighGx: 45.0, thighGy: 2.4, thighGz: 11.5, estimatedKAM: 0.45, estimatedKFM: 0.72 },
-    { time: '12:31', thighAx: 0.8, thighAy: 10.1, thighAz: 1.4, thighGx: 18.2, thighGy: -2.0, thighGz: 6.0, estimatedKAM: 0.55, estimatedKFM: 0.82 },
-    { time: '12:33', thighAx: -0.3, thighAy: 9.2, thighAz: 0.9, thighGx: -5.4, thighGy: -4.8, thighGz: 3.1, estimatedKAM: 0.40, estimatedKFM: 0.60 },
-    { time: '12:35', thighAx: 0.42, thighAy: 9.78, thighAz: 1.15, thighGx: 12.4, thighGy: -3.8, thighGz: 5.6, estimatedKAM: 0.42, estimatedKFM: 0.68 },
+    { time: '12:25', s1Ax: 0.4, s1Ay: 9.8, s1Az: 1.1, s1Gx: 12.0, s1Gy: -3.5, s1Gz: 5.2, estimatedKAM: 0.32, estimatedKFM: 0.45 },
+    { time: '12:27', s1Ax: 1.2, s1Ay: 11.2, s1Az: 1.6, s1Gx: 28.5, s1Gy: -1.2, s1Gz: 7.8, estimatedKAM: 0.38, estimatedKFM: 0.58 },
+    { time: '12:29', s1Ax: 2.1, s1Ay: 13.4, s1Az: 2.3, s1Gx: 45.0, s1Gy: 2.4, s1Gz: 11.5, estimatedKAM: 0.45, estimatedKFM: 0.72 },
+    { time: '12:31', s1Ax: 0.8, s1Ay: 10.1, s1Az: 1.4, s1Gx: 18.2, s1Gy: -2.0, s1Gz: 6.0, estimatedKAM: 0.55, estimatedKFM: 0.82 },
+    { time: '12:33', s1Ax: -0.3, s1Ay: 9.2, s1Az: 0.9, s1Gx: -5.4, s1Gy: -4.8, s1Gz: 3.1, estimatedKAM: 0.40, estimatedKFM: 0.60 },
+    { time: '12:35', s1Ax: 0.42, s1Ay: 9.78, s1Az: 1.15, s1Gx: 12.4, s1Gy: -3.8, s1Gz: 5.6, estimatedKAM: 0.42, estimatedKFM: 0.68 },
   ]);
 
   const intervalRef = useRef<number | null>(null);
@@ -67,23 +67,23 @@ export const LiveMonitoring: React.FC = () => {
         const oscillation = Math.sin(t * 3.5);
         const cosOscillation = Math.cos(t * 3.5);
 
-        const newThighAx = Number((0.42 + oscillation * 1.8).toFixed(2));
-        const newThighAy = Number((9.78 + Math.abs(oscillation) * 3.2).toFixed(2));
-        const newThighAz = Number((1.15 + cosOscillation * 1.2).toFixed(2));
-        const newThighGx = Number((12.4 + oscillation * 35.0).toFixed(1));
-        const newThighGy = Number((-3.8 + cosOscillation * 15.0).toFixed(1));
-        const newThighGz = Number((5.6 + oscillation * 8.0).toFixed(1));
+        const newS1Ax = Number((0.42 + oscillation * 1.8).toFixed(2));
+        const newS1Ay = Number((9.78 + Math.abs(oscillation) * 3.2).toFixed(2));
+        const newS1Az = Number((1.15 + cosOscillation * 1.2).toFixed(2));
+        const newS1Gx = Number((12.4 + oscillation * 35.0).toFixed(1));
+        const newS1Gy = Number((-3.8 + cosOscillation * 15.0).toFixed(1));
+        const newS1Gz = Number((5.6 + oscillation * 8.0).toFixed(1));
 
-        setThighReadings({
-          ax: newThighAx,
-          ay: newThighAy,
-          az: newThighAz,
-          gx: newThighGx,
-          gy: newThighGy,
-          gz: newThighGz,
+        setSensor1Readings({
+          ax: newS1Ax,
+          ay: newS1Ay,
+          az: newS1Az,
+          gx: newS1Gx,
+          gy: newS1Gy,
+          gz: newS1Gz,
         });
 
-        setShankReadings({
+        setSensor2Readings({
           ax: Number((-0.28 - oscillation * 2.1).toFixed(2)),
           ay: Number((9.84 + Math.abs(cosOscillation) * 3.8).toFixed(2)),
           az: Number((2.34 + oscillation * 1.4).toFixed(2)),
@@ -105,12 +105,12 @@ export const LiveMonitoring: React.FC = () => {
           const timeStr = `${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
           const nextPoint: SignalPoint = {
             time: timeStr,
-            thighAx: newThighAx,
-            thighAy: newThighAy,
-            thighAz: newThighAz,
-            thighGx: newThighGx,
-            thighGy: newThighGy,
-            thighGz: newThighGz,
+            s1Ax: newS1Ax,
+            s1Ay: newS1Ay,
+            s1Az: newS1Az,
+            s1Gx: newS1Gx,
+            s1Gy: newS1Gy,
+            s1Gz: newS1Gz,
             estimatedKAM: newKAM,
             estimatedKFM: newKFM,
           };
@@ -142,8 +142,8 @@ export const LiveMonitoring: React.FC = () => {
   const handleReset = () => {
     setStatus('Idle');
     setElapsedSeconds(0);
-    setThighReadings(initialThighIMU);
-    setShankReadings(initialShankIMU);
+    setSensor1Readings(initialSensor1IMU);
+    setSensor2Readings(initialSensor2IMU);
     setCurrentKAM(0.42);
     setCurrentKFM(0.68);
   };
@@ -324,7 +324,7 @@ export const LiveMonitoring: React.FC = () => {
                 <h4 className="text-sm font-bold text-[#172B4D]">ESP32 Controller</h4>
                 <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-[#16A36A]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]"></span>
-                  <span>BLE Hub Online</span>
+                  <span>Wi-Fi Hub Online</span>
                 </div>
               </div>
             </div>
@@ -366,15 +366,15 @@ export const LiveMonitoring: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc X</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.ax}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.ax}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc Y</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.ay}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.ay}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc Z</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.az}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.az}</span>
                   </div>
                 </div>
               </div>
@@ -387,15 +387,15 @@ export const LiveMonitoring: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr X</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.gx}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.gx}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr Y</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.gy}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.gy}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr Z</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{thighReadings.gz}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor1Readings.gz}</span>
                   </div>
                 </div>
               </div>
@@ -421,15 +421,15 @@ export const LiveMonitoring: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc X</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.ax}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.ax}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc Y</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.ay}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.ay}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Acc Z</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.az}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.az}</span>
                   </div>
                 </div>
               </div>
@@ -442,15 +442,15 @@ export const LiveMonitoring: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr X</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.gx}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.gx}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr Y</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.gy}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.gy}</span>
                   </div>
                   <div className="p-2.5 rounded bg-[#F7F8FA] border border-[#E5E7EB] text-center">
                     <span className="text-[10px] text-[#718096] block">Gyr Z</span>
-                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{shankReadings.gz}</span>
+                    <span className="text-sm font-bold text-[#172B4D] tabular-nums">{sensor2Readings.gz}</span>
                   </div>
                 </div>
               </div>
@@ -485,17 +485,17 @@ export const LiveMonitoring: React.FC = () => {
                 <LineChart data={signals} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                   <XAxis dataKey="time" stroke="#718096" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#718096" fontSize={11} tickLine={false} unit=" m/s²" />
+                  <YAxis stroke="#718096" fontSize={11} tickLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB', borderRadius: '0.375rem', fontSize: '11px' }}
                   />
                   <Legend verticalAlign="top" height={30} iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
                   {/* Acc X: Burnt Orange #E87532 */}
-                  <Line type="monotone" dataKey="thighAx" name="Acc X" stroke="#E87532" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="s1Ax" name="Acc X" stroke="#E87532" strokeWidth={2} dot={false} isAnimationActive={false} />
                   {/* Acc Y: Primary Navy #172B4D */}
-                  <Line type="monotone" dataKey="thighAy" name="Acc Y" stroke="#172B4D" strokeWidth={2} dot={false} isAnimationActive={false} />
-                  {/* Acc Z: Secondary Navy #243B5A */}
-                  <Line type="monotone" dataKey="thighAz" name="Acc Z" stroke="#243B5A" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="s1Ay" name="Acc Y" stroke="#172B4D" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  {/* Acc Z: grey dashed */}
+                  <Line type="monotone" dataKey="s1Az" name="Acc Z" stroke="#718096" strokeDasharray="5 3" strokeWidth={2} dot={false} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -518,17 +518,17 @@ export const LiveMonitoring: React.FC = () => {
                 <LineChart data={signals} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                   <XAxis dataKey="time" stroke="#718096" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#718096" fontSize={11} tickLine={false} unit=" °/s" />
+                  <YAxis stroke="#718096" fontSize={11} tickLine={false} />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB', borderRadius: '0.375rem', fontSize: '11px' }}
                   />
                   <Legend verticalAlign="top" height={30} iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
                   {/* Gyr X: Burnt Orange #E87532 */}
-                  <Line type="monotone" dataKey="thighGx" name="Gyr X" stroke="#E87532" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="s1Gx" name="Gyr X" stroke="#E87532" strokeWidth={2} dot={false} isAnimationActive={false} />
                   {/* Gyr Y: Primary Navy #172B4D */}
-                  <Line type="monotone" dataKey="thighGy" name="Gyr Y" stroke="#172B4D" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="s1Gy" name="Gyr Y" stroke="#172B4D" strokeWidth={2} dot={false} isAnimationActive={false} />
                   {/* Gyr Z: Secondary Orange #F59E5B */}
-                  <Line type="monotone" dataKey="thighGz" name="Gyr Z" stroke="#F59E5B" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="s1Gz" name="Gyr Z" stroke="#F59E5B" strokeDasharray="5 3" strokeWidth={2} dot={false} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -607,7 +607,7 @@ export const LiveMonitoring: React.FC = () => {
         <div className="mt-7">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-xs font-bold text-[#172B4D] uppercase tracking-wider">
-              KAM and KFM Trend
+              KAM and KFM Trend, %BW&middot;BH
             </h4>
 
             <span className="text-[11px] text-[#718096]">
@@ -638,7 +638,6 @@ export const LiveMonitoring: React.FC = () => {
                   stroke="#718096"
                   fontSize={11}
                   tickLine={false}
-                  unit=" %BW·BH"
                   domain={['auto', 'auto']}
                 />
 

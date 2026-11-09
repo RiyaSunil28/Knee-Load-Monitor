@@ -97,16 +97,12 @@ export interface SystemActivityLog {
 }
 
 /** Person selector options for biomechanics model evaluation */
-export type PersonOption =
-  | 'Sample person A'
-  | 'Sample person B'
-  | 'Sample person C';
+export type PersonOption = string;
 
 /** Sensor configuration selector options */
 export type SensorConfigOption =
   | '8 IMUs (baseline)'
-  | '3 IMUs (coming next)'
-  | '2 IMUs: best pair (after the placement study)';
+  | '2 IMUs: best pair';
 
 /** Data point for KAM & KFM moment curves across stance phase */
 export interface KneeMomentDataPoint {

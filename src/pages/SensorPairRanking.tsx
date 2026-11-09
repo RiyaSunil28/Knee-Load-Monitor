@@ -101,6 +101,44 @@ export const SensorPairRanking: React.FC = () => {
 
     const hasResults = Boolean(rankingData?.results.length);
 
+    const scoreOf = (result?: PairResult) => {
+        if (!result) return undefined;
+        if (typeof result.combinedRmse === 'number' && Number.isFinite(result.combinedRmse)) {
+            return result.combinedRmse;
+        }
+        if (
+            typeof result.kamRmse === 'number' &&
+            typeof result.kfmRmse === 'number' &&
+            Number.isFinite(result.kamRmse) &&
+            Number.isFinite(result.kfmRmse)
+        ) {
+            return (result.kamRmse + result.kfmRmse) / 2;
+        }
+        return undefined;
+    };
+
+    // Pairs with results come first (lowest error first); pairs without results keep their order.
+    const rows = ALL_PAIRS.map((pair) => {
+        const result = getResult(pair.sensorA, pair.sensorB);
+        return { ...pair, result, score: scoreOf(result) };
+    }).sort((a, b) => {
+        if (a.score === undefined && b.score === undefined) return 0;
+        if (a.score === undefined) return 1;
+        if (b.score === undefined) return -1;
+        return a.score - b.score;
+    });
+
+    const bestRow = rows[0] && rows[0].score !== undefined ? rows[0] : null;
+
+    const referenceScore = (a: string, b: string) => scoreOf(getResult(a, b));
+    const thighShankScore = (() => {
+        const scores = [
+            referenceScore('Left Thigh', 'Left Shank'),
+            referenceScore('Right Thigh', 'Right Shank'),
+        ].filter((value): value is number => value !== undefined);
+        return scores.length ? Math.min(...scores) : undefined;
+    })();
+
     return (
         <div className="space-y-6">
             {/* Page Heading */}
@@ -128,9 +166,9 @@ export const SensorPairRanking: React.FC = () => {
                         Sensor placement study
                     </p>
                     <p className="text-sm text-[#718096] mt-1">
-                        All 28 possible pairs are listed below. No pair has been selected
-                        as the best configuration because experimental ranking results
-                        are not available yet.
+                        All 28 possible pairs are listed below. {hasResults
+                            ? 'Pairs are sorted by combined error, lowest first. The top pair is a candidate, not a final choice.'
+                            : 'No pair has been selected as the best configuration because experimental ranking results are not available yet.'}
                     </p>
                 </div>
             </div>
@@ -167,10 +205,12 @@ export const SensorPairRanking: React.FC = () => {
                         Selected best pair
                     </div>
                     <p className="text-xl font-bold text-[#E87532] mt-3">
-                        Not decided
+                        {bestRow ? `${bestRow.sensorA} + ${bestRow.sensorB}` : 'Not decided'}
                     </p>
                     <p className="text-xs text-[#718096] mt-1">
-                        Pending placement study
+                        {bestRow
+                            ? `Lowest error in this study (${formatMetric(bestRow.score)}). Final choice also depends on wearability.`
+                            : 'Pending placement study'}
                     </p>
                 </div>
             </div>
@@ -195,7 +235,7 @@ export const SensorPairRanking: React.FC = () => {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-[#F7F8FA] text-[#172B4D]">
                                 <tr>
-                                    <th className="px-5 py-3 font-semibold">Pair</th>
+                                    <th className="px-5 py-3 font-semibold">Rank</th>
                                     <th className="px-5 py-3 font-semibold">Sensor 1</th>
                                     <th className="px-5 py-3 font-semibold">Sensor 2</th>
                                     <th className="px-5 py-3 font-semibold">KAM RMSE</th>
@@ -205,31 +245,36 @@ export const SensorPairRanking: React.FC = () => {
                             </thead>
 
                             <tbody className="divide-y divide-[#E5E7EB]">
-                                {ALL_PAIRS.map((pair, index) => {
-                                    const result = getResult(pair.sensorA, pair.sensorB);
+                                {rows.map((row, index) => {
+                                    const isBest = bestRow !== null && index === 0;
 
                                     return (
                                         <tr
-                                            key={`${pair.sensorA}-${pair.sensorB}`}
-                                            className="hover:bg-[#F7F8FA]"
+                                            key={`${row.sensorA}-${row.sensorB}`}
+                                            className={isBest ? 'bg-[#FFF8F2]' : 'hover:bg-[#F7F8FA]'}
                                         >
                                             <td className="px-5 py-3 font-medium text-[#172B4D]">
-                                                {index + 1}
+                                                {row.score !== undefined ? index + 1 : '–'}
+                                                {isBest && (
+                                                    <span className="ml-2 text-[10px] font-semibold uppercase text-[#E87532]">
+                                                        Best
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-5 py-3 text-[#475569]">
-                                                {pair.sensorA}
+                                                {row.sensorA}
                                             </td>
                                             <td className="px-5 py-3 text-[#475569]">
-                                                {pair.sensorB}
+                                                {row.sensorB}
                                             </td>
                                             <td className="px-5 py-3 text-[#475569]">
-                                                {formatMetric(result?.kamRmse)}
+                                                {formatMetric(row.result?.kamRmse)}
                                             </td>
                                             <td className="px-5 py-3 text-[#475569]">
-                                                {formatMetric(result?.kfmRmse)}
+                                                {formatMetric(row.result?.kfmRmse)}
                                             </td>
                                             <td className="px-5 py-3 text-[#475569]">
-                                                {formatMetric(result?.combinedRmse)}
+                                                {formatMetric(row.score)}
                                             </td>
                                         </tr>
                                     );
@@ -249,16 +294,16 @@ export const SensorPairRanking: React.FC = () => {
                 )}
             </section>
 
-            {/* Reference Configurations */}
+            {/* Reference Configuration */}
             <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                     <Layers className="w-5 h-5 text-[#E87532]" />
                     <h2 className="text-lg font-semibold text-[#172B4D]">
-                        Reference Configurations
+                        Reference Configuration
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     <div className="p-4 rounded-lg border border-[#E5E7EB] bg-[#F7F8FA]">
                         <p className="font-semibold text-[#172B4D]">
                             Thigh + Shank
@@ -270,20 +315,11 @@ export const SensorPairRanking: React.FC = () => {
                             The initially proposed two-sensor arrangement. Exact body
                             placement remains undecided.
                         </p>
+                        <p className="text-sm font-semibold text-[#172B4D] mt-2">
+                            Combined RMSE: {formatMetric(thighShankScore)}
+                        </p>
                     </div>
 
-                    <div className="p-4 rounded-lg border border-[#E5E7EB] bg-[#F7F8FA]">
-                        <p className="font-semibold text-[#172B4D]">
-                            All 8 IMUs
-                        </p>
-                        <p className="text-xs text-[#E87532] font-medium mt-1">
-                            Baseline reference
-                        </p>
-                        <p className="text-sm text-[#718096] mt-2">
-                            Full sensor configuration used as a reference for evaluating
-                            reduced-sensor configurations.
-                        </p>
-                    </div>
                 </div>
             </section>
 

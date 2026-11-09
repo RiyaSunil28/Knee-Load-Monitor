@@ -113,12 +113,6 @@ export const LoadTrendChart: React.FC<LoadTrendChartProps> = ({ data }) => {
               tickLine={false}
               axisLine={{ stroke: '#E5E7EB' }}
               domain={['auto', 'auto']}
-              label={{
-                value: '%BW·BH',
-                angle: -90,
-                position: 'insideLeft',
-                style: { fill: '#718096', fontSize: 11 },
-              }}
             />
 
             <Tooltip content={<CustomTooltip />} />
